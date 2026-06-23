@@ -47,7 +47,19 @@ sed '/.*isolinux.bin.*/d' -i "$CHECKSUMS"
 
 ## Create ISO
 echo "Generating $ISO_OUTPUT"
-"$ISO_TOOL" -o "$ISO_OUTPUT" -v -J -R -D -A "huronOS" -V "huronOS" -no-emul-boot -boot-info-table -boot-load-size 4 -b boot/isolinux.bin -c boot/isolinux.boot .
+
+# PARCHE
+# Emparejar las versiones de Syslinux usando los binarios nativos del sistema
+sudo cp /usr/lib/ISOLINUX/isolinux.bin boot/isolinux.bin
+sudo cp /usr/lib/syslinux/modules/bios/ldlinux.c32 boot/ldlinux.c32
+
+# Añadir sudo para sortear la restricción de permisos de los módulos .hsm
+sudo "$ISO_TOOL" -o "$ISO_OUTPUT" -v -J -R -D -A "huronOS" -V "huronOS" -no-emul-boot -boot-info-table -boot-load-size 4 -b boot/isolinux.bin -c boot/isolinux.boot .
+
+# Hibridar la ISO resultante para poder arranquar en USB
+echo "Aplicando parche isohybrid..."
+sudo isohybrid "$ISO_OUTPUT"
+
 
 ## Gen ISO Hash
 sha256sum "$ISO_OUTPUT" | sed 's, .*/, ,' > "$ISO_OUTPUT.sha256"

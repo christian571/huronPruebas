@@ -1,4 +1,6 @@
 # huronOS-build-tools
+> **ATENCIÓN / DISCLAIMER:** Este repositorio es *fork*  de pruebas creado por christian571. Contiene modificaciones experimentales y parches aplicados sobre las herramientas de empaquetado originales en make-iso.sh. Todo el crédito del diseño, la arquitectura y los derechos del sistema operativo pertenecen en su totalidad al equipo original de desarrollo de huronOS (<http://huronos.org>).
+***
 
 This repository contain the build scripts for the GNU / Linux distribution huronOS, which can be downloaded on [huronos.org](https://huronos.org).
 
