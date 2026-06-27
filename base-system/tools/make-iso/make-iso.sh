@@ -53,13 +53,23 @@ echo "Generating $ISO_OUTPUT"
 sudo cp /usr/lib/ISOLINUX/isolinux.bin boot/isolinux.bin
 sudo cp /usr/lib/syslinux/modules/bios/ldlinux.c32 boot/ldlinux.c32
 
-# Añadir sudo para sortear la restricción de permisos de los módulos .hsm
-sudo "$ISO_TOOL" -o "$ISO_OUTPUT" -v -J -R -D -A "huronOS" -V "huronOS" -no-emul-boot -boot-info-table -boot-load-size 4 -b boot/isolinux.bin -c boot/isolinux.boot .
+# creacion de imagen EFI para soporte UEFI 
+echo "Generando imagen FAT para arranque UEFI..."
+sudo dd if=/dev/zero of=boot/efiboot.img bs=1M count=10
+sudo mkfs.vfat boot/efiboot.img
+sudo mkdir -p /tmp/efimnt
+sudo mount -o loop boot/efiboot.img /tmp/efimnt
+sudo mkdir -p /tmp/efimnt/EFI/Boot
+sudo cp -r EFI/Boot/* /tmp/efimnt/EFI/Boot/
+sudo umount /tmp/efimnt
+sudo rm -rf /tmp/efimnt
+
+# Sudo para sortear la restricción de permisos de los módulos .hsm
+sudo "$ISO_TOOL" -o "$ISO_OUTPUT" -v -J -R -D -A "huronOS" -V "huronOS" -no-emul-boot -boot-info-table -boot-load-size 4 -b boot/isolinux.bin -c boot/isolinux.boot -eltorito-alt-boot -e boot/efiboot.img -no-emul-boot .
 
 # Hibridar la ISO resultante para poder arranquar en USB
 echo "Aplicando parche isohybrid..."
-sudo isohybrid "$ISO_OUTPUT"
-
+sudo isohybrid --uefi "$ISO_OUTPUT"
 
 ## Gen ISO Hash
 sha256sum "$ISO_OUTPUT" | sed 's, .*/, ,' > "$ISO_OUTPUT.sha256"
