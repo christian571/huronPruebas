@@ -61,6 +61,10 @@ sudo mkdir -p /tmp/efimnt
 sudo mount -o loop boot/efiboot.img /tmp/efimnt
 sudo mkdir -p /tmp/efimnt/EFI/Boot
 sudo cp -r EFI/Boot/* /tmp/efimnt/EFI/Boot/
+sudo mkdir -p /tmp/efimnt/boot
+sudo cp bootloader/legacy/huronos.cfg /tmp/efimnt/boot/
+sudo cp bootloader/legacy/syslinux.cfg /tmp/efimnt/boot/
+sudo cp bootloader/EFI/Boot/*.c32 /tmp/efimnt/boot/
 sudo umount /tmp/efimnt
 sudo rm -rf /tmp/efimnt
 
