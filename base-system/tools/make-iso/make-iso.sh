@@ -55,22 +55,22 @@ sudo cp /usr/lib/syslinux/modules/bios/ldlinux.c32 boot/ldlinux.c32
 
 # creacion de imagen EFI para soporte UEFI 
 echo "Generando imagen FAT para arranque UEFI..."
-sudo dd if=/dev/zero of=boot/efiboot.img bs=1M count=10
+sudo dd if=/dev/zero of=boot/efiboot.img bs=1M count=150
 sudo mkfs.vfat boot/efiboot.img
 sudo mkdir -p /tmp/efimnt
 sudo mount -o loop boot/efiboot.img /tmp/efimnt
 sudo mkdir -p /tmp/efimnt/EFI/Boot
-sudo cp -r EFI/Boot/* /tmp/efimnt/EFI/Boot/
 sudo mkdir -p /tmp/efimnt/boot
-sudo cp bootloader/legacy/huronos.cfg /tmp/efimnt/boot/
-sudo cp bootloader/legacy/syslinux.cfg /tmp/efimnt/boot/
-sudo cp bootloader/EFI/Boot/*.c32 /tmp/efimnt/boot/
+# Copia los binarios y módulos gráficos (.c32) de EFI
+sudo cp -r EFI/Boot/* /tmp/efimnt/EFI/Boot/
+# Copia el Kernel, initramfs y la configuración legacy
+sudo find boot/ -maxdepth 1 -type f -not -name "efiboot.img" -exec cp {} /tmp/efimnt/boot/ \;
+# Inyecta el menú de huronOS como el menú principal de Syslinux EFI
+sudo cp boot/huronos.cfg /tmp/efimnt/EFI/Boot/syslinux.cfg
 sudo umount /tmp/efimnt
 sudo rm -rf /tmp/efimnt
-
 # Sudo para sortear la restricción de permisos de los módulos .hsm
 sudo "$ISO_TOOL" -o "$ISO_OUTPUT" -v -J -R -D -A "huronOS" -V "huronOS" -no-emul-boot -boot-info-table -boot-load-size 4 -b boot/isolinux.bin -c boot/isolinux.boot -eltorito-alt-boot -e boot/efiboot.img -no-emul-boot .
-
 # Hibridar la ISO resultante para poder arranquar en USB
 echo "Aplicando parche isohybrid..."
 sudo isohybrid --uefi "$ISO_OUTPUT"
